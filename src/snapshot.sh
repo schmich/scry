@@ -1,14 +1,14 @@
 #!/bin/sh
 
-if [ ! -d /var/scry ]; then
-  echo '/var/scry does not exist, exiting.'
+base=/var/scry
+if [ ! -d "$base" ]; then
+  echo "$base does not exist, exiting."
   exit 1
 fi
 
-cd /var/scry
-timestamp=`date +"%s"`
-mkdir "$timestamp" && cd "$timestamp"
-dir=`pwd`
+cd "$base"
+dir=`date +"%s"`
+mkdir "$dir" && cd "$dir"
 
 offset=0
 count=0
@@ -32,10 +32,8 @@ while true; do
 done
 
 echo 'Compress snapshot.'
-cd ..
-tar -c "$dir" | xz -1 > "$timestamp.tar.xz"
+cd "$base"
+tar -c "$dir" | xz -1 > "${dir}.tar.xz"
 rm -rf "$dir"
-
-echo 'Upload snapshot.'
 
 echo 'Finished.'
