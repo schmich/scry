@@ -12,7 +12,7 @@ mkdir "$dir" && cd "$dir"
 
 offset=0
 count=0
-retries=5
+retries=10
 while true; do
   url="https://api.twitch.tv/kraken/streams?limit=100&offset=$offset"
   echo "Download $url."
@@ -34,8 +34,8 @@ while true; do
     continue
   fi
 
-  error=`jq '.error // empty' "$file"`
-  if [ ! -z $error ]; then
+  error=`jq -r '.error // empty' "$file"`
+  if [ ! -z "$error" ]; then
     retries=$((retries - 1))
     if [ $retries -eq 0 ]; then
       echo "Failed to download $url, abort."
@@ -46,7 +46,7 @@ while true; do
     continue
   fi
 
-  retries=5
+  retries=10
   offset=$((offset + 80))
   count=$((count + 1))
 
