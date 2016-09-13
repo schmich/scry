@@ -7,7 +7,7 @@ Track Twitch stream stats.
 ```bash
 mkdir /srv/scry
 docker run --restart always -d -v /srv/scry:/var/scry schmich/scry:latest
-# You can also pick a stable tag from https://hub.docker.com/r/schmich/scry/tags
+# You can pick a stable tag from https://hub.docker.com/r/schmich/scry/tags
 ```
 
 ## License
