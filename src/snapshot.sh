@@ -2,7 +2,7 @@
 
 base=/var/scry
 if [ ! -d "$base" ]; then
-  echo "$base does not exist, exiting."
+  echo "$base does not exist, abort."
   exit 1
 fi
 
@@ -15,7 +15,7 @@ count=0
 retries=5
 while true; do
   url="https://api.twitch.tv/kraken/streams?limit=100&offset=$offset"
-  echo "Downloading $url."
+  echo "Download $url."
   file="${count}.json"
 
   curl -s -o "$file" \
@@ -26,10 +26,22 @@ while true; do
   if [ $? -ne 0 ]; then
     retries=$((retries - 1))
     if [ $retries -eq 0 ]; then
-      echo "Failed to download $url, aborting."
+      echo "Failed to download $url, abort."
       exit 1
     fi
-    echo 'Download failed, trying again.'
+    echo 'Download failed, try again.'
+    sleep 5
+    continue
+  fi
+
+  error=`jq '.error // empty' "$file"`
+  if [ ! -z $error ]; then
+    retries=$((retries - 1))
+    if [ $retries -eq 0 ]; then
+      echo "Failed to download $url, abort."
+      exit 1
+    fi
+    echo 'Error in response, try again.'
     sleep 5
     continue
   fi
