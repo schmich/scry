@@ -18,7 +18,11 @@ while true; do
   echo "Downloading $url."
   file="${count}.json"
 
-  curl -s -o "$file" -H 'Accept: application/vnd.twitchtv.v3+json' "$url"
+  curl -s -o "$file" \
+    -H 'Accept: application/vnd.twitchtv.v3+json' \
+    -H 'Client-ID: Scry (https://github.com/schmich/scry)' \
+    "$url"
+
   if [ $? -ne 0 ]; then
     retries=$((retries - 1))
     if [ $retries -eq 0 ]; then
