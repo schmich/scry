@@ -1,14 +1,21 @@
 #!/bin/sh
 
-base=/var/scry
-if [ ! -d "$base" ]; then
-  echo "$base does not exist, abort."
+repo=/var/scry
+if [ ! -d "$repo" ]; then
+  echo "$repo does not exist, abort."
   exit 1
 fi
 
-cd "$base"
-dir=`date +"%s"`
-mkdir "$dir" && cd "$dir"
+tmp=`mktemp -d`
+if [ $? -ne 0 ]; then
+  echo 'Could not create temp directory.'
+  exit 1
+fi
+trap 'rm -rf "$tmp"' EXIT
+
+cd "$tmp"
+timestamp=`date +"%s"`
+mkdir "$timestamp" && cd "$timestamp"
 
 offset=0
 count=0
@@ -59,8 +66,9 @@ while true; do
 done
 
 echo 'Compress snapshot.'
-cd "$base"
-tar -c "$dir" | xz -1 > "${dir}.tar.xz"
-rm -rf "$dir"
+cd "$tmp"
+snapshot="${timestamp}.tar.xz"
+tar -c "$timestamp" | xz -1 > "$snapshot"
+mv "$snapshot" "$repo"
 
 echo 'Finished.'
