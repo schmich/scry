@@ -14,7 +14,7 @@ fi
 trap 'rm -rf "$tmp"' EXIT
 
 cd "$tmp"
-timestamp=`date +%s`
+timestamp=`date +%Y-%m-%d-%H%M%S-%s`
 mkdir "$timestamp" && cd "$timestamp"
 
 offset=0
