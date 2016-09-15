@@ -54,7 +54,7 @@ while true; do
     continue
   fi
 
-  jq --argjson snapshot_at $snapshot_at \
+  jq -c --argjson snapshot_at $snapshot_at \
     '. * { snapshot_at: $snapshot_at }' "$file" | sponge "$file"
 
   retries=10
