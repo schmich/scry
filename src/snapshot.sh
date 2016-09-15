@@ -25,7 +25,7 @@ while true; do
   echo "Download $url."
   file="${count}.json"
 
-  curl -s -o "$file" \
+  timeout -t 5 curl -s -o "$file" \
     -H 'Accept: application/vnd.twitchtv.v3+json' \
     -H 'Client-ID: Scry (https://github.com/schmich/scry)' \
     "$url"
