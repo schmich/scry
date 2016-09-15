@@ -14,7 +14,7 @@ fi
 trap 'rm -rf "$tmp"' EXIT
 
 cd "$tmp"
-timestamp=`date +"%s"`
+timestamp=`date +%s`
 mkdir "$timestamp" && cd "$timestamp"
 
 offset=0
@@ -25,6 +25,7 @@ while true; do
   echo "Download $url."
   file="${count}.json"
 
+  snapshot_at=`date +%s`
   timeout -t 5 curl -s -o "$file" \
     -H 'Accept: application/vnd.twitchtv.v3+json' \
     -H 'Client-ID: Scry (https://github.com/schmich/scry)' \
@@ -52,6 +53,9 @@ while true; do
     sleep 5
     continue
   fi
+
+  jq --argjson snapshot_at $snapshot_at \
+    '. * { snapshot_at: $snapshot_at }' "$file" | sponge "$file"
 
   retries=10
   offset=$((offset + 80))
