@@ -71,8 +71,6 @@ while true; do
   if [ $streams -eq 0 ]; then
     break
   fi
-
-  sleep 0.5
 done
 
 echo 'Compress snapshot.'
