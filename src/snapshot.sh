@@ -26,7 +26,7 @@ while true; do
   file="${count}.json"
 
   snapshot_at=`date +%s`
-  timeout -t 5 curl -s -o "$file" \
+  timeout 5 curl -s -o "$file" \
     -H 'Accept: application/vnd.twitchtv.v3+json' \
     -H 'Client-ID: Scry (https://github.com/schmich/scry)' \
     "$url"
