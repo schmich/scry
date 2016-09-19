@@ -6,6 +6,12 @@ if [ ! -d "$repo" ]; then
   exit 1
 fi
 
+clientId=`jq -r .clientId /etc/scry/config.json`
+if [ -z "$clientId" ]; then
+  echo 'Client ID not specified, abort.'
+  exit 1
+fi
+
 tmp=`mktemp -d`
 if [ $? -ne 0 ]; then
   echo 'Could not create temp directory.'
@@ -25,10 +31,10 @@ while true; do
   echo "Download $url."
   file="${count}.json"
 
-  snapshot_at=`date +%s`
+  snapshotAt=`date +%s`
   timeout 5 curl -s -o "$file" \
     -H 'Accept: application/vnd.twitchtv.v3+json' \
-    -H 'Client-ID: Scry (https://github.com/schmich/scry)' \
+    -H "Client-ID: $clientId" \
     "$url"
 
   if [ $? -ne 0 ]; then
@@ -54,7 +60,7 @@ while true; do
     continue
   fi
 
-  jq -c --argjson snapshot_at $snapshot_at \
+  jq -c --argjson snapshot_at $snapshotAt \
     '. * { snapshot_at: $snapshot_at }' "$file" | sponge "$file"
 
   retries=10
