@@ -8,7 +8,7 @@ Twitch requires a Client ID for all API requests. [Register your app with Twitch
 
 ```bash
 mkdir /srv/scry
-echo '{ "clientId": "your-twitch-client-id" }' > /srv/scry/config.json
+echo '{ "client_id": "your-twitch-client-id" }' > /srv/scry/config.json
 docker run --restart always -d -v /srv/scry:/var/scry -v /srv/scry:/etc/scry schmich/scry:latest
 # You can pick a stable tag from https://hub.docker.com/r/schmich/scry/tags
 ```

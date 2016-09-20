@@ -1,5 +1,4 @@
-#!/bin/sh
-
+dir=$(dirname $(readlink -f "$0")) 
 timestamp=`date +%Y-%m-%d-%H%M%S-%s`
 
 repo=/var/scry
@@ -8,7 +7,7 @@ if [ ! -d "$repo" ]; then
   exit 1
 fi
 
-clientId=`jq -r .clientId /etc/scry/config.json`
+clientId=`jq -r .client_id /etc/scry/config.json`
 if [ -z "$clientId" ]; then
   echo 'Client ID not specified, abort.'
   exit 1
@@ -22,76 +21,10 @@ fi
 trap 'rm -rf "$tmp"' EXIT
 
 cd "$tmp"
-mkdir "$timestamp" && cd "$timestamp"
 
-offset=0
-count=0
-retries=10
-while true; do
-  url="https://api.twitch.tv/kraken/streams?limit=100&offset=$offset"
-  echo "Download $url."
-  file="${count}.json"
-
-  snapshotAt=`date +%s`
-  timeout 5 curl -s -o "$file" \
-    -H 'Accept: application/vnd.twitchtv.v3+json' \
-    -H "Client-ID: $clientId" \
-    "$url"
-
-  if [ $? -ne 0 ]; then
-    retries=$((retries - 1))
-    if [ $retries -eq 0 ]; then
-      echo "Failed to download $url, abort."
-      exit 1
-    fi
-    echo 'Download failed, try again.'
-    sleep 5
-    continue
-  fi
-
-  error=`jq -r '.error // empty' "$file"`
-  if [ ! -z "$error" ]; then
-    retries=$((retries - 1))
-    if [ $retries -eq 0 ]; then
-      echo "Failed to download $url, abort."
-      exit 1
-    fi
-    echo 'Error in response, try again.'
-    sleep 5
-    continue
-  fi
-
-  jq -c --argjson snapshot_at $snapshotAt \
-    '. * { snapshot_at: $snapshot_at } |
-     del(._links,
-         .streams[]._links,
-         .streams[].preview,
-         .streams[].delay,
-         .streams[].channel._links,
-         .streams[].channel.logo,
-         .streams[].channel.video_banner,
-         .streams[].channel.profile_banner,
-         .streams[].channel.banner,
-         .streams[].channel.background,
-         .streams[].channel.game,
-         .streams[].channel.profile_banner_background_color,
-         .streams[].channel.delay,
-         .streams[].channel.url)' "$file" | sponge "$file"
-
-  retries=10
-  offset=$((offset + 80))
-  count=$((count + 1))
-
-  streams=`jq '.streams | length' "$file"`
-  if [ $streams -eq 0 ]; then
-    break
-  fi
-done
-
-echo 'Compress snapshot.'
-cd "$tmp"
-snapshot="${timestamp}.tar.xz"
-tar -c "$timestamp" | xz -9 > "$snapshot"
+echo 'Create snapshot.'
+snapshot="${timestamp}.json.xz"
+`ruby "$dir/snapshot.rb" "$clientId" | xz -9 > "$snapshot"`
 mv "$snapshot" "$repo"
 
 echo 'Finished.'
