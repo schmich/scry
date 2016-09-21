@@ -18,26 +18,27 @@ def paginate(url)
   end
 end
 
-def attempt(count:, error:)
+def attempt(max:, delay:, error:)
   begin
     yield
   rescue => e
     $stderr.puts "#{error}\nError: #{e}"
 
-    count -= 1
-    if count == 0
+    max -= 1
+    if max == 0
       $stderr.puts 'Not retrying, abort.'
       exit 1
     end
 
-    sleep 5
+    sleep delay
     retry
   end
 end
 
 def download(client_id, source_url)
   paginate(source_url) do |url|
-    attempt(count: 10, error: "Failed to download #{url}.") do
+    attempt(max: 10, delay: 5, error: "Failed to download #{url}.") do
+      content = nil
       Timeout::timeout(5) do
         headers = {
           'Accept' => 'application/vnd.twitchtv.v3+json',
@@ -46,11 +47,13 @@ def download(client_id, source_url)
 
         $stderr.puts "Download #{url}."
         open(url, headers) do |f|
-          resp = JSON.parse(f.read)
-          raise 'Error in response.' if !resp['error'].nil?
-          return if !(yield resp)
+          content = f.read
         end
       end
+
+      resp = JSON.parse(content)
+      raise 'Error in response.' if !resp['error'].nil?
+      return if !(yield resp)
     end 
   end
 end

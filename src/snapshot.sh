@@ -24,7 +24,7 @@ cd "$tmp"
 
 echo 'Create snapshot.'
 snapshot="${timestamp}.json.xz"
-`ruby "$dir/snapshot.rb" "$clientId" | xz -9 > "$snapshot"`
+ruby "$dir/snapshot.rb" "$clientId" | xz -9 > "$snapshot"
 mv "$snapshot" "$repo"
 
 echo 'Finished.'
