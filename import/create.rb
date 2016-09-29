@@ -5,7 +5,7 @@ require 'date'
 require 'set'
 require 'enumerator'
 
-client = Mysql2::Client.new(
+$client = Mysql2::Client.new(
   host: 'mysql',
   username: 'root',
   password: 'scry',
@@ -14,9 +14,9 @@ client = Mysql2::Client.new(
 )
 
 def run_multi(query)
-  result = client.query(create)
-  while client.next_result
-    result = client.store_result
+  result = $client.query(query)
+  while $client.next_result
+    result = $client.store_result
   end
 end
 
@@ -110,5 +110,6 @@ create = <<SQL
     REFERENCES streams(id);
 SQL
 
+puts 'Create database.'
 run_multi(drop)
 run_multi(create)
