@@ -1,0 +1,17 @@
+version: '2'
+services:
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8080:80"
+    links:
+      - mysql:db
+  mysql:
+    image: mysql
+    expose:
+      - 3306
+    volumes:
+      - ./sql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=scry
+      - MYSQL_DATABASE=scry
