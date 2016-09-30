@@ -119,7 +119,7 @@ def insert_records(channels, channel_samples, streams, stream_samples, featured_
     channel_samples.sort_by { |r| r[:channel_id ]}.each_slice(batch) do |rs|
       query = 'INSERT IGNORE INTO channel_samples (channel_id, timestamp, followers, views, partner, language, mature) VALUES '
       query += rs.map { |r|
-        "(#{r[:channel_id]},#{r[:timestamp]},#{r[:followers]},#{r[:views]},#{r[:partner]?1:0},\"#{e(r[:language])}\",#{r[:mature]?1:0})"
+        "(#{r[:channel_id]},#{r[:timestamp]},#{r[:followers]},#{r[:views]},#{r[:partner]},\"#{e(r[:language])}\",#{r[:mature]})"
       }.join(',')
       $client.query(query)
     end
@@ -135,7 +135,7 @@ def insert_records(channels, channel_samples, streams, stream_samples, featured_
     stream_samples.sort_by { |r| r[:stream_id] }.each_slice(batch) do |rs|
       query = 'INSERT IGNORE INTO stream_samples (stream_id, timestamp, game_id, viewers, status, playlist) VALUES '
       query += rs.map { |r|
-        "(#{r[:stream_id]},#{r[:timestamp]},#{r[:game_id]},#{r[:viewers]},\"#{e(r[:status])}\",#{r[:playlist]?1:0})"
+        "(#{r[:stream_id]},#{r[:timestamp]},#{r[:game_id]},#{r[:viewers]},\"#{e(r[:status])}\",#{r[:playlist]})"
       }.join(',')
       $client.query(query)
     end
