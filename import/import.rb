@@ -185,9 +185,9 @@ end
 
 resume_from = ARGV[1]
 if !resume_from
-  puts 'Importing from start.'
+  puts 'Import from start.'
 else
-  puts "Resuming import from #{resume_from}."
+  puts "Resume import from #{resume_from}."
 end
 
 base_dir = File.dirname(__FILE__)
