@@ -108,7 +108,7 @@ def insert_records(channels, channel_samples, streams, stream_samples, featured_
 
     batch = 5_000
 
-    channels.sort_by { |r| r[:id] }.each_slice(batch) do |rs|
+    channels.each_slice(batch) do |rs|
       query = 'INSERT IGNORE INTO channels (id, name, display_name, created_at) VALUES '
       query += rs.map { |r|
         "(#{r[:id]},\"#{e(r[:name])}\",\"#{e(r[:display_name])}\",\"#{r[:created_at]}\")"
@@ -116,7 +116,7 @@ def insert_records(channels, channel_samples, streams, stream_samples, featured_
       $client.query(query)
     end
 
-    channel_samples.sort_by { |r| r[:channel_id ]}.each_slice(batch) do |rs|
+    channel_samples.each_slice(batch) do |rs|
       query = 'INSERT IGNORE INTO channel_samples (channel_id, timestamp, followers, views, partner, language, mature) VALUES '
       query += rs.map { |r|
         "(#{r[:channel_id]},#{r[:timestamp]},#{r[:followers]},#{r[:views]},#{r[:partner]},\"#{e(r[:language])}\",#{r[:mature]})"
@@ -124,7 +124,7 @@ def insert_records(channels, channel_samples, streams, stream_samples, featured_
       $client.query(query)
     end
 
-    streams.sort_by { |r| r[:id] }.each_slice(batch) do |rs|
+    streams.each_slice(batch) do |rs|
       query = 'INSERT IGNORE INTO streams (id, channel_id, created_at) VALUES '
       query += rs.map { |r|
         "(#{r[:id]},#{r[:channel_id]},\"#{r[:created_at]}\")"
@@ -132,7 +132,7 @@ def insert_records(channels, channel_samples, streams, stream_samples, featured_
       $client.query(query)
     end
 
-    stream_samples.sort_by { |r| r[:stream_id] }.each_slice(batch) do |rs|
+    stream_samples.each_slice(batch) do |rs|
       query = 'INSERT IGNORE INTO stream_samples (stream_id, timestamp, game_id, viewers, status, playlist) VALUES '
       query += rs.map { |r|
         "(#{r[:stream_id]},#{r[:timestamp]},#{r[:game_id]},#{r[:viewers]},\"#{e(r[:status])}\",#{r[:playlist]})"
@@ -140,7 +140,7 @@ def insert_records(channels, channel_samples, streams, stream_samples, featured_
       $client.query(query)
     end
 
-    featured_samples.sort_by { |r| r[:stream_id] }.each_slice(batch) do |rs|
+    featured_samples.each_slice(batch) do |rs|
       query = 'INSERT IGNORE INTO featured_samples (stream_id, timestamp, title, text, priority, sponsored) VALUES '
       query += rs.map { |r|
         "(#{r[:stream_id]},#{r[:timestamp]},\"#{e(r[:title])}\",\"#{e(r[:text])}\",#{r[:priority]},#{r[:sponsored]})"

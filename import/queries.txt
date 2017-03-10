@@ -1,0 +1,120 @@
+avg(avg)
+avg(peak)
+channel age
+followers
+views
+concat(games)
+stream instances
+
+
+select 
+  peak.channel_id, peak.display_name as name, peak.channel_created_at,
+  peak.followers, peak.views, floor(avg(peak.avg_viewers)) as avg_viewers, floor(avg(peak.max_viewers)) as max_viewers,
+  peak.stream_count, peak.game
+from
+(
+  select c.id as channel_id, c.display_name, c.channel_created_at, followers, c.views, max(ss.viewers) as max_viewers, avg(ss.viewers) as avg_viewers, count(s.id) as stream_count, g.name as game
+  from channels_latest c
+  join streams s on s.channel_id=c.id
+  join stream_samples ss on ss.stream_id=s.id
+  join games g on g.id=c.game_id
+  where c.language='en'
+  group by s.id
+) as peak
+group by peak.channel_id
+having avg_viewers > 15 and avg_viewers < 300
+limit 2
+
+-------------------------
+
+select
+ ...
+from (
+
+
+  create view stream_stats as 
+  select 
+    cs.channel_id, floor(avg(cs.max_viewers)) as max_viewers
+  from
+  (
+    select c.id as channel_id, max(ss.viewers) as max_viewers
+    from channels c
+    join streams s on s.channel_id=c.id
+    join stream_samples ss on ss.stream_id=s.id
+    group by s.id
+  ) as cs
+  group by cs.channel_id
+
+  having avg_viewers > 15 and avg_viewers < 300
+  limit 2
+) as stats
+
+
+>>> index ss.viewers
+    create view stream_stats as
+    select s.id as stream_id, c.id as channel_id, max(ss.viewers) as max_viewers, avg(ss.viewers) as avg_viewers
+    from channels c
+    join streams s on s.channel_id=c.id
+    join stream_samples ss on ss.stream_id=s.id
+    group by s.id
+
+
+
+  select c.id as channel_id, c.display_name, c.channel_created_at, followers, c.views, max(ss.viewers) as max_viewers, avg(ss.viewers) as avg_viewers, count(s.id) as stream_count, g.name as game
+  from channels_latest c
+  join streams s on s.channel_id=c.id
+  join stream_samples ss on ss.stream_id=s.id
+  join games g on g.id=c.game_id
+  where c.language='en'
+  group by s.id
+) as peak
+group by peak.channel_id
+having avg_viewers > 15 and avg_viewers < 300
+limit 2
+
+
+-------------------------
+
+CREATE VIEW channel_samples_latest AS
+SELECT channel_id, timestamp, followers, views, partner, language, mature
+FROM channel_samples s1
+WHERE timestamp=(SELECT MAX(s2.timestamp) FROM channel_samples s2 WHERE s2.channel_id=s1.channel_id)
+
+-------------------------
+
+
+CREATE VIEW channel_samples_latest AS
+SELECT l.channel_id, l.timestamp, l.followers, l.views, l.partner, l.language, l.mature
+FROM channel_samples l
+LEFT JOIN channel_samples r
+ON l.channel_id=r.channel_id
+AND l.timestamp < r.timestamp
+WHERE r.channel_id IS NULL
+
+CREATE VIEW streams_latest AS
+SELECT l.id, l.channel_id, l.created_at
+FROM streams l
+LEFT JOIN streams r
+ON l.channel_id=r.channel_id
+AND l.created_at < r.created_at
+WHERE r.channel_id IS NULL
+
+CREATE VIEW stream_samples_latest AS
+SELECT s.channel_id, l.stream_id, l.timestamp, l.game_id, l.viewers, l.status, l.playlist, s.created_at
+FROM streams_latest s
+JOIN stream_samples l
+ON s.id=l.stream_id
+LEFT JOIN stream_samples r
+ON l.stream_id=r.stream_id
+AND l.timestamp < r.timestamp
+WHERE r.stream_id IS NULL
+
+
+  CREATE VIEW channels_latest AS
+    SELECT c.id, c.name, c.display_name, c.created_at AS channel_created_at,
+           cs.followers, cs.views, cs.partner, cs.language, cs.mature,
+           ss.game_id, ss.viewers, ss.status, ss.playlist, ss.created_at AS stream_created_at
+    FROM channels c
+    JOIN channel_samples_latest cs ON cs.channel_id=c.id
+    JOIN stream_samples_latest ss ON ss.channel_id=c.id
+

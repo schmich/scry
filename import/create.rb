@@ -108,6 +108,14 @@ create = <<SQL
     ADD CONSTRAINT fk_featured_samples_stream_id
     FOREIGN KEY (stream_id)
     REFERENCES streams(id);
+
+  CREATE VIEW channels_latest
+    AS SELECT c.*, cs.* FROM channels c
+    JOIN channel_samples cs ON cs.channel_id=c.id
+    WHERE cs.timestamp=(
+      SELECT MAX(timestamp) FROM channel_samples
+      WHERE channel_id=c.id
+    )
 SQL
 
 puts 'Create database.'
